@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirecting...</title>
+
+  <!-- Ocultar TODO el contenido -->
+  <style>
+    html, body { 
+      display: none !important; 
+      margin: 0; padding: 0; 
+    }
+  </style>
+
+  <!-- Meta Pixel -->
+  <script>
+    const PIXEL_ID = '1690120698537576';
+    !function(f,b,e,v,n,t,s){
+      if(f.fbq) return; n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq) f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0';
+      n.queue=[]; t=b.createElement(e); t.async=!0;
+      t.src=v; s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s);
+    }(window, document, 'script',
+      'https://connect.facebook.net/en_US/fbevents.js'
+    );
+    fbq('init', PIXEL_ID);
+    fbq('track', 'ViewContent');
+  </script>
+</head>
+<body>
+  <script>
+const whatsappNumbers = [
+  '5491133818674',
+  '5491125664757',
+  '5491171678825',
+  '5491170976336',
+  '5491171670533',
+  '5491170976348',
+  '5491171678824',
+  '5491156302748',
+  '5491156309699',
+  '5491171668758',
+  '5491178468327',
+  '5491178448911',
+  '5491126160328',
+  '5491178447241',
+  '5491156303738',
+  '5491171672805',
+  // Nuevos números agregados previamente
+  '5491170976352',
+  '5491156309435',
+  '5491156324296',
+  '5491133818598',
+  '5491156303204',
+  '5491125896242',
+  '5491133818664',
+  '5491171833565',
+  // Nuevos números adicionales
+  '5491133818652',
+  '5491133818639',
+  '5491178469537',
+  '5491178496554',
+  '5491178470347',
+  '5491178168216',
+  '5491178468261',
+  '5491178468250',
+  '5491178467366',
+  '5491178451078',
+  '5491178448872',
+  '5491178468632',
+  '5491178447554',
+  '5491178450396',
+  '5491178467380',
+  '5491178467342'
+];
+
+
+
+    const URL = 'https://d7acs3bv9f.execute-api.us-east-2.amazonaws.com/prod/MK';
+    
+
+    function parseCookies() {
+      return document.cookie
+        .split('; ')
+        .reduce((o, v) => {
+          const [k, ...rest] = v.split('=');
+          o[k] = rest.join('=');
+          return o;
+        }, {});
+    }
+
+    function waitForCookie(name, timeout = 3000) {
+      return new Promise(res => {
+        const interval = 100;
+        let waited = 0;
+        const timer = setInterval(() => {
+          if (document.cookie.includes(name + '=') || waited >= timeout) {
+            clearInterval(timer);
+            res();
+          }
+          waited += interval;
+        }, interval);
+      });
+    }
+
+
+    const MSG = 'Hola ANUBIS! Vengo por mi 200% extra.';  
+
+    window.addEventListener('load', async () => {
+      // 1) Esperar cookies Meta Pixel
+      await Promise.all([ waitForCookie('_fbc'), waitForCookie('_fbp') ]);
+
+      // 2) Recolectar datos
+      const cookies = parseCookies();
+      const uuid    = crypto.randomUUID().replace(/-/g,'');
+      const tsSec   = Math.floor(Date.now() / 1000);
+      const payload = {
+        pixel_id:          PIXEL_ID,
+        event_time:        tsSec,
+        event_source_url:  window.location.href,
+        fbc:               cookies._fbc || null,
+        fbp:               cookies._fbp || null,
+        external_id:       uuid,
+        country:           'AR',
+        client_user_agent: navigator.userAgent
+      };
+
+      // 3) Enviar evento al backend
+      try {
+        await fetch(URL, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload)
+        });
+      } catch (e) {
+        console.warn('Error enviando evento:', e);
+      }
+
+       const waNumber = whatsappNumbers[Math.floor(Math.random() * whatsappNumbers.length)];
+
+
+
+      window.location.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(MSG)}`;
+    });
+  </script>
+</body>
+</html>
