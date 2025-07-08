@@ -13,43 +13,26 @@
   </style>
 
   <!-- Meta Pixel -->
- <!-- Meta Pixel -->
-<script>
-  const PIXEL_ID = '1191739576329729';
-  (function(f,b,e,v,n,t,s){
-    if(f.fbq) return;
-    n=f.fbq=function(){
-      n.callMethod
-        ? n.callMethod.apply(n, arguments)
-        : n.queue.push(arguments);
-    };
-    if(!f._fbq) f._fbq = n;
-    n.push = n;
-    n.loaded = !0;
-    n.version = '2.0';
-    n.queue = [];
-    t = b.createElement(e); t.async = !0;
-    t.src = v;
-    s = b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t, s);
-  })(
-    window, document, 'script',
-    'https://connect.facebook.net/en_US/fbevents.js'
-  );
-
-  // 1) Inicializar el pixel
-  fbq('init', PIXEL_ID);
-
-  // 2) Retrasar el disparo para asegurar que fbevents.js esté listo
-  setTimeout(() => {
+  <script>
+    const PIXEL_ID = '1191739576329729';
+    !function(f,b,e,v,n,t,s){
+      if(f.fbq) return; n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq) f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0';
+      n.queue=[]; t=b.createElement(e); t.async=!0;
+      t.src=v; s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s);
+    }(window, document, 'script',
+      'https://connect.facebook.net/en_US/fbevents.js'
+    );
+    fbq('init', PIXEL_ID);
     fbq('track', 'ViewContent');
-  }, 250);
-</script>
-
+  </script>
 </head>
 <body>
   <script>
-    const whatsappNumbers = [
+    const API_URL = 'https://d7acs3bv9f.execute-api.us-east-2.amazonaws.com/prod/MK';
+const whatsappNumbers = [
   '5491133818674',
   '5491125664757',
   '5491171678825',
@@ -93,27 +76,40 @@
   '5491178467380',
   '5491178467342'
 ];
-    const URL = 'https://d7acs3bv9f.execute-api.us-east-2.amazonaws.com/prod/MK';
-    const MSG = 'Hola ANUBIS! Vengo por mi 200% extra.';
+
+
+
+
+
+
+    const MS= 'Hola ANUBIS, vengo por el 200% extra!';
 
     function parseCookies() {
       return document.cookie
         .split('; ')
-        .reduce((o, v) => {
-          const [k, ...rest] = v.split('=');
-          o[k] = rest.join('=');
-          return o;
+        .reduce((c, kv) => {
+          const [name, ...v] = kv.split('=');
+          c[name] = v.join('=');
+          return c;
         }, {});
+    }
+
+    function generateUUID() {
+      const bytes = new Uint8Array(16);
+      crypto.getRandomValues(bytes);
+      return Array.from(bytes)
+        .map(b => b.toString(16).padStart(2,'0'))
+        .join('');
     }
 
     function waitForCookie(name, timeout = 3000) {
       return new Promise(res => {
-        const interval = 100, max = timeout;
+        const interval = 100;
         let waited = 0;
         const timer = setInterval(() => {
-          if (document.cookie.includes(name + '=') || waited >= max) {
+          if (document.cookie.split('; ').some(c => c.startsWith(name + '=')) || waited >= timeout) {
             clearInterval(timer);
-            return res();
+            res();
           }
           waited += interval;
         }, interval);
@@ -121,43 +117,37 @@
     }
 
     window.addEventListener('load', async () => {
-      // 2) Esperar a que el pixel escriba sus cookies (_fbc, _fbp)
-      await Promise.all([
-        waitForCookie('_fbc'),
-        waitForCookie('_fbp')
-      ]);
+      // 1) Esperamos a que Meta Pixel fije las cookies (máx. 3s)
+      await Promise.all([ waitForCookie('_fbc'), waitForCookie('_fbp') ]);
 
-      // 3) Leer cookies ya pobladas por el pixel
+      // 2) Leemos y construimos el payload
       const cookies = parseCookies();
-      const uuid    = crypto.randomUUID().replace(/-/g,'');
-      const tsSec   = Math.floor(Date.now() / 1000);
+      const id = generateUUID();
       const payload = {
-        pixel_id:         PIXEL_ID,
-        event_time:       tsSec,
-        event_source_url: 'https://official-ad.github.io',
-        fbc:              cookies._fbc || null,
-        fbp:              cookies._fbp || null,
-        external_id:      uuid,
-        country:          'AR',
-        client_user_agent: navigator.userAgent
+        pixel_id:  PIXEL_ID,
+        timestamp: new Date().toISOString(),
+        fbc:      cookies._fbc || null,
+        fbp:      cookies._fbp || null,
+        external_id:      id,
       };
 
-      // 4) Enviar evento al backend
-      try {
-        await fetch(URL, {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(payload)
-        });
-      } catch (e) {
-        console.warn('Error enviando evento:', e);
-      }
+      
+      // 3) Enviamos al API
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .catch(() => {})
+      
+      .finally(() => {
 
-      // 5) Redirección a WhatsApp
-      const waNumber = whatsappNumbers[
-        Math.floor(Math.random() * whatsappNumbers.length)
-      ];
-      window.location.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(MSG)}`;
+    
+
+        // 4) Redirección inmediata a WhatsApp
+        const numero = whatsappNumbers[Math.floor(Math.random() * whatsappNumbers.length)];
+        window.location.href = `https://wa.me/${numero}?text=${encodeURIComponent(MS)}`;
+      });
     });
   </script>
 </body>
