@@ -37,7 +37,6 @@
     // 1) Init y primer evento con retardo
     fbq('init', PIXEL_ID);
     setTimeout(() => {
-      fbq('track', 'PageView');
       fbq('track', 'ViewContent');
     }, 250);
   </script>
