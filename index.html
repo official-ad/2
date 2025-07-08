@@ -13,33 +13,39 @@
   </style>
 
   <!-- Meta Pixel -->
-  <script>
-    const PIXEL_ID = '1191739576329729';
-    !function(f,b,e,v,n,t,s){
-      if(f.fbq) return; 
-      n=f.fbq=function(){
-        n.callMethod?
-          n.callMethod.apply(n,arguments):
-          n.queue.push(arguments)
-      };
-      if(!f._fbq) f._fbq=n; 
-      n.push=n; n.loaded=!0; n.version='2.0';
-      n.queue=[]; 
-      t=b.createElement(e); t.async=!0;
-      t.src=v; 
-      s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s);
-    }(
-      window, document, 'script',
-      'https://connect.facebook.net/en_US/fbevents.js'
-    );
+ <!-- Meta Pixel -->
+<script>
+  const PIXEL_ID = '1191739576329729';
+  (function(f,b,e,v,n,t,s){
+    if(f.fbq) return;
+    n=f.fbq=function(){
+      n.callMethod
+        ? n.callMethod.apply(n, arguments)
+        : n.queue.push(arguments);
+    };
+    if(!f._fbq) f._fbq = n;
+    n.push = n;
+    n.loaded = !0;
+    n.version = '2.0';
+    n.queue = [];
+    t = b.createElement(e); t.async = !0;
+    t.src = v;
+    s = b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t, s);
+  })(
+    window, document, 'script',
+    'https://connect.facebook.net/en_US/fbevents.js'
+  );
 
-    // 1) Init y primer evento con retardo
-    fbq('init', PIXEL_ID);
-    setTimeout(() => {
-      fbq('track', 'ViewContent');
-    }, 250);
-  </script>
+  // 1) Inicializar el pixel
+  fbq('init', PIXEL_ID);
+
+  // 2) Retrasar el disparo para asegurar que fbevents.js esté listo
+  setTimeout(() => {
+    fbq('track', 'ViewContent');
+  }, 250);
+</script>
+
 </head>
 <body>
   <script>
