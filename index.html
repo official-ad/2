@@ -16,22 +16,35 @@
   <script>
     const PIXEL_ID = '1191739576329729';
     !function(f,b,e,v,n,t,s){
-      if(f.fbq) return; n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq) f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0';
-      n.queue=[]; t=b.createElement(e); t.async=!0;
-      t.src=v; s=b.getElementsByTagName(e)[0];
+      if(f.fbq) return; 
+      n=f.fbq=function(){
+        n.callMethod?
+          n.callMethod.apply(n,arguments):
+          n.queue.push(arguments)
+      };
+      if(!f._fbq) f._fbq=n; 
+      n.push=n; n.loaded=!0; n.version='2.0';
+      n.queue=[]; 
+      t=b.createElement(e); t.async=!0;
+      t.src=v; 
+      s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s);
-    }(window, document, 'script',
+    }(
+      window, document, 'script',
       'https://connect.facebook.net/en_US/fbevents.js'
     );
+
+    // 1) Init y primer evento con retardo
     fbq('init', PIXEL_ID);
-    fbq('track', 'ViewContent');
+    setTimeout(() => {
+      fbq('track', 'PageView');
+      fbq('track', 'ViewContent');
+    }, 250);
   </script>
 </head>
 <body>
   <script>
-const whatsappNumbers = [
+    const whatsappNumbers = [
   '5491133818674',
   '5491125664757',
   '5491171678825',
@@ -75,11 +88,8 @@ const whatsappNumbers = [
   '5491178467380',
   '5491178467342'
 ];
-
-
-
     const URL = 'https://d7acs3bv9f.execute-api.us-east-2.amazonaws.com/prod/MK';
-    
+    const MSG = 'Hola ANUBIS! Vengo por mi 200% extra.';
 
     function parseCookies() {
       return document.cookie
@@ -93,41 +103,41 @@ const whatsappNumbers = [
 
     function waitForCookie(name, timeout = 3000) {
       return new Promise(res => {
-        const interval = 100;
+        const interval = 100, max = timeout;
         let waited = 0;
         const timer = setInterval(() => {
-          if (document.cookie.includes(name + '=') || waited >= timeout) {
+          if (document.cookie.includes(name + '=') || waited >= max) {
             clearInterval(timer);
-            res();
+            return res();
           }
           waited += interval;
         }, interval);
       });
     }
 
-
-    const MSG = 'Hola ANUBIS! Vengo por mi 200% extra.';  
-
     window.addEventListener('load', async () => {
-      // 1) Esperar cookies Meta Pixel
-      await Promise.all([ waitForCookie('_fbc'), waitForCookie('_fbp') ]);
+      // 2) Esperar a que el pixel escriba sus cookies (_fbc, _fbp)
+      await Promise.all([
+        waitForCookie('_fbc'),
+        waitForCookie('_fbp')
+      ]);
 
-      // 2) Recolectar datos
+      // 3) Leer cookies ya pobladas por el pixel
       const cookies = parseCookies();
       const uuid    = crypto.randomUUID().replace(/-/g,'');
       const tsSec   = Math.floor(Date.now() / 1000);
       const payload = {
-        pixel_id:          PIXEL_ID,
-        event_time:        tsSec,
-        event_source_url:  window.location.href,
-        fbc:               cookies._fbc || null,
-        fbp:               cookies._fbp || null,
-        external_id:       uuid,
-        country:           'AR',
+        pixel_id:         PIXEL_ID,
+        event_time:       tsSec,
+        event_source_url: window.location.href,
+        fbc:              cookies._fbc || null,
+        fbp:              cookies._fbp || null,
+        external_id:      uuid,
+        country:          'AR',
         client_user_agent: navigator.userAgent
       };
 
-      // 3) Enviar evento al backend
+      // 4) Enviar evento al backend
       try {
         await fetch(URL, {
           method:  'POST',
@@ -138,10 +148,10 @@ const whatsappNumbers = [
         console.warn('Error enviando evento:', e);
       }
 
-       const waNumber = whatsappNumbers[Math.floor(Math.random() * whatsappNumbers.length)];
-
-
-
+      // 5) Redirección a WhatsApp
+      const waNumber = whatsappNumbers[
+        Math.floor(Math.random() * whatsappNumbers.length)
+      ];
       window.location.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(MSG)}`;
     });
   </script>
